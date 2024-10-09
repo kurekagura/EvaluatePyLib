@@ -20,6 +20,15 @@
 				"console": "integratedTerminal",
 				"justMyCode": true,
 				"args": []
+			},
+			{
+				"name": "Python: call_sproc",
+				"type": "debugpy",
+				"request": "launch",
+				"program": "call_sproc.py",
+				"console": "integratedTerminal",
+				"justMyCode": true,
+				"args": []
 			}
 		]
 	}
