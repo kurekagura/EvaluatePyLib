@@ -25,7 +25,15 @@ if __name__ == "__main__":
 
         print(df)
 
+        # CSVに出力
+        if not os.path.exists(".output"):
+            os.makedirs(".output")
+        csv_file_path = ".output/output.csv"  # 出力ファイル名
+        df.to_csv(csv_file_path, index=False)  # CSVに出力。index=Falseでインデックスを含めない
+
     except pyodbc.Error as e:
         print(f"Error occurred: {e}")
+    except OSError as e:
+        print(f"Error occurred: {e}")
 
-    print("finished.")
+    print("success.")
