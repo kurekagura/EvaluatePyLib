@@ -33,7 +33,6 @@ def plot_price_of_column(axis, df, plot_column):
     # NaNを無視したデータを抽出
     valid_data = df[[plot_column]].dropna()
     axis.plot(valid_data.index, valid_data[plot_column], label=plot_column)
-    axis.legend(fontsize=6)  # 凡例
 
 
 if __name__ == "__main__":
@@ -49,23 +48,33 @@ if __name__ == "__main__":
     # start = args.datestart
     # end = args.dateend
 
-    csv_file_path = "sample1.csv"
+    csv_file_path = "../../../PrivateJunkData/20241013_StockChartData2.csv"
     abs_csv_file_path = os.path.abspath(csv_file_path)
     df, variable_columns = read_csv(abs_csv_file_path)
+    date_count = len(df) - 1  # ヘッダを除いた行数
 
+    label_date_size = 9
+    label_price_size = 12
+    label_ratio_size = 9
     dpi = 100
 
     # ピクセル単位で指定した幅と高さ
-    w_pix, h_pix = 1920, 1080
-    # w_pix, h_pix = 3840, 2160
+    # w_pix, h_pix = 326 * dpi, 1080  # OK
+    # w_pix, h_pix = 327 * dpi, 1080  # 32700 OK
+    # w_pix, h_pix = 328 * dpi, 1080  # NG 327インチが最大のようだ
+    w_pix, h_pix = date_count * 18, 1080
+
+    inchfigsize = (w_pix / dpi, h_pix / dpi)
 
     price_axis_height = h_pix * 0.7  # チャートエリアの高さ
-    tick_area_height = 80  # 目盛りエリアの高さ
+    tick_area_height = 100  # x軸目盛りエリアの高さ
     ratio_axis_height = h_pix - price_axis_height - tick_area_height  # 騰落レシオエリアの高さ
     side_margin = 60  # 縦軸ラベルの幅
 
     # # インチ指定が必須のためインチに変換
-    fig = plt.figure(figsize=(w_pix / dpi, h_pix / dpi), dpi=dpi)
+    fig = plt.figure(figsize=inchfigsize, dpi=dpi)
+    print(inchfigsize)
+    print(w_pix, h_pix)
 
     left_margin_ratio = side_margin / w_pix
     ww_ratio = (w_pix - side_margin * 2) / w_pix
@@ -74,11 +83,11 @@ if __name__ == "__main__":
     ax_ratio = fig.add_axes([left_margin_ratio, (tick_area_height / h_pix), ww_ratio, (ratio_axis_height / h_pix)])
 
     ax_price.plot(df.index, df["close"], color="blue", marker=".")
-    ax_price.set_ylabel("Price", fontsize=8)
+    # ax_price.set_ylabel("Price", fontsize=label_price_size)
     ax_price.set_xticks(range(len(df)))  # データポイントの数だけX軸の目盛を設定
     ax_price.set_xlim(0, len(df) - 1)  # 余白なしの設定
-    ax_price.set_xticklabels([""] * len(df), rotation=90, horizontalalignment="center", fontsize=8)  # ラベルを空に設定
-    ax_price.tick_params(labelright=True, labelsize=8)
+    ax_price.set_xticklabels([""] * len(df))  # ラベルを空に設定
+    ax_price.tick_params(labelright=True, labelsize=label_price_size)
     ax_price.grid(True)
 
     ratio = ((df["close"] - df["close"].shift(1)) / df["close"].shift(1)) * 100
@@ -91,24 +100,27 @@ if __name__ == "__main__":
     ax_ratio.bar([x - 0.5 for x in bar_pos_x], ratio, color="gray", width=0.8)  # widthを適切に設定
 
     ax_ratio.yaxis.set_major_formatter(mplotticker.FuncFormatter(lambda x, _: f"{x:.2f}%"))
-    ax_ratio.tick_params(labelright=True, labelsize=8)
-    ax_ratio.set_ylabel("ratio", fontsize=8)
+    ax_ratio.tick_params(labelright=True, labelsize=label_ratio_size)
+    # ax_ratio.set_ylabel("ratio", fontsize=label_ratio_size)
 
     ax_ratio.set_xticks(range(len(df)))  # データポイントの数だけX軸の目盛を設定
     ax_ratio.set_xlim(0, len(df) - 1)  # 余白なしの設定
-    ax_ratio.set_xticklabels(df.index, rotation=90, horizontalalignment="center", fontsize=8)
+    ax_ratio.set_xticklabels(df.index, rotation=90, horizontalalignment="center", fontsize=9)
     ax_ratio.grid(True)
 
     # 可変列をループでプロット
     for column in variable_columns:
         plot_price_of_column(ax_price, df, column)
 
-    plt.show(block=True)
+    ax_price.legend(fontsize=label_price_size)  # 凡例
 
-    # base_name = os.path.splitext(os.path.basename(abs_csv_file_path))[0]  # ファイル名の取得と拡張子を.pngに変更
-    # img_output_path = f".output/{base_name}.png"
-    # if not os.path.exists(".output"):
-    #     os.makedirs(".output")
-    # plt.savefig(img_output_path, dpi=dpi)  # 解像度(dpi)を指定して保存
+    # plt.show(block=True)
+
+    base_name = os.path.splitext(os.path.basename(abs_csv_file_path))[0]  # ファイル名の取得と拡張子を.pngに変更
+    img_output_path = f".output/{base_name}_{w_pix}x{h_pix}-{dpi}.png"
+    if not os.path.exists(".output"):
+        os.makedirs(".output")
+
+    fig.savefig(img_output_path, dpi=dpi)  # 解像度(dpi)を指定して保存
 
     print("finished.")
