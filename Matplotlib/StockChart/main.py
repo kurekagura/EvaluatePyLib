@@ -2,6 +2,7 @@ import os
 import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib.ticker as mplotticker
+import matplotlib.transforms as mtransforms
 
 
 def read_csv(csv_file_path):
@@ -60,9 +61,11 @@ if __name__ == "__main__":
 
     # ピクセル単位で指定した幅と高さ
     # w_pix, h_pix = 326 * dpi, 1080  # OK
-    # w_pix, h_pix = 327 * dpi, 1080  # 32700 OK
+    w_pix, h_pix = 327 * dpi, 1080  # 32700 OK
     # w_pix, h_pix = 328 * dpi, 1080  # NG 327インチが最大のようだ
-    w_pix, h_pix = date_count * 18, 1080
+    # w_pix, h_pix = date_count * 18, 1080
+    # w_pix, h_pix = 34000, 1080
+    # w_pix, h_pix = 32700 * 2, 1080
 
     inchfigsize = (w_pix / dpi, h_pix / dpi)
 
@@ -117,10 +120,24 @@ if __name__ == "__main__":
     # plt.show(block=True)
 
     base_name = os.path.splitext(os.path.basename(abs_csv_file_path))[0]  # ファイル名の取得と拡張子を.pngに変更
-    img_output_path = f".output/{base_name}_{w_pix}x{h_pix}-{dpi}.png"
+    img_output_path = f".output/{base_name}_{w_pix}x{h_pix}-dpi{dpi}.png"
     if not os.path.exists(".output"):
         os.makedirs(".output")
 
-    fig.savefig(img_output_path, dpi=dpi)  # 解像度(dpi)を指定して保存
+    # extent = ax_price.get_window_extent()
+    # print(extent)
+    # bbox = extent.transformed(fig.dpi_scale_trans.inverted())
+    # print(bbox)
+
+    # bb_width = (w_pix - side_margin * 2) / 2
+    # # BBoxの作成 (左下の座標 (x_min, y_min), 幅 width, 高さ height)
+    # bbox1 = mtransforms.Bbox.from_bounds(side_margin / dpi, 0, bb_width / dpi, h_pix / dpi)
+    # print(bbox1, f"{bbox1.width}x{bbox1.height}")
+    # fig.savefig(".output/cropped1.png", bbox_inches=bbox1)
+    # bbox2 = mtransforms.Bbox.from_bounds(bbox1.x0 + bbox1.width, 0, bb_width / dpi, h_pix / dpi)
+    # print(bbox2, f"{bbox2.width}x{bbox2.height}")
+    # fig.savefig(".output/cropped2.png", bbox_inches=bbox2)
+
+    fig.savefig(img_output_path, dpi=dpi)  # 解像度(dpi)を指定することもできる
 
     print("finished.")
